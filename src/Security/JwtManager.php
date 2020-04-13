@@ -70,14 +70,17 @@ class JwtManager
     /**
      * @param string $jwt
      *
-     * @return User|null
+     * @return User
+     * @throws \Exception
      */
-    public function user(string $jwt): ?User
+    public function user(string $jwt): User
     {
-        try {
-            return User::fromJSON((array)JWT::decode($jwt, self::KEY, ['HS256']));
-        } catch (Throwable $exception) {
-            return null;
+        $decoded = JWT::decode($jwt, self::KEY, ['HS256']);
+        if (!isset($decoded->user)) {
+            throw new \Exception("Invalid JWT token");
         }
+
+        return User::fromJSON((array)$decoded->user);
+
     }
 }

@@ -23,6 +23,7 @@ class LocationsController extends AbstractController
         if (!$location) {
             throw $this->createNotFoundException();
         }
+
         $location['children'] = $manager
             ->createQuery("SELECT l FROM App:Location l WHERE l.parent=:id")
             ->execute(['id' => $locationId], Query::HYDRATE_ARRAY);

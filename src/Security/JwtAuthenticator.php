@@ -55,7 +55,7 @@ class JwtAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request): string
     {
         return $request->query->has('access_token')
-            ? $request->query->getAlnum('access_token')
+            ? $request->query->get('access_token')
             : substr($request->headers->get('authorization'), 7);
     }
 
