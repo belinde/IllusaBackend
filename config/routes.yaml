@@ -1,0 +1,8 @@
+homepage:
+    path: /
+    controller: App\Controller\DefaultController::homepage
+
+oauthPostToken:
+    path: /oauth/token
+    methods: [POST]
+    controller: App\Controller\Oauth2Controller::postToken
