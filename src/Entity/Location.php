@@ -22,7 +22,7 @@ class Location
     private $label;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="simple_array", length=65535, nullable=true)
      */
     private $attributes = [];
 
@@ -50,6 +50,11 @@ class Location
      * @ORM\OneToOne(targetEntity="App\Entity\Location")
      */
     private $next;
+
+    /**
+     * @ORM\Column(type="text", nullable=true, length=16777215)
+     */
+    private $description;
 
 
     public function getId(): ?int
@@ -143,6 +148,18 @@ class Location
     public function setSize(int $size): self
     {
         $this->size = $size;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }
