@@ -27,16 +27,6 @@ class Location
     private $attributes = [];
 
     /**
-     * @ORM\Column(type="integer")
-     */
-    private $size;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $contains;
-
-    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Location")
      */
     private $parent;
@@ -55,6 +45,16 @@ class Location
      * @ORM\Column(type="text", nullable=true, length=16777215)
      */
     private $description;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $shortDescription;
 
 
     public function getId(): ?int
@@ -82,18 +82,6 @@ class Location
     public function setAttributes(array $attributes): self
     {
         $this->attributes = $attributes;
-
-        return $this;
-    }
-
-    public function getContains(): ?int
-    {
-        return $this->contains;
-    }
-
-    public function setContains(int $contains): self
-    {
-        $this->contains = $contains;
 
         return $this;
     }
@@ -131,24 +119,6 @@ class Location
     {
         $this->next = $next;
 
-        // set (or unset) the owning side of the relation if necessary
-        $newPrev = null === $next ? null : $this;
-        if ($next->getPrev() !== $newPrev) {
-            $next->setPrev($newPrev);
-        }
-
-        return $this;
-    }
-
-    public function getSize(): ?int
-    {
-        return $this->size;
-    }
-
-    public function setSize(int $size): self
-    {
-        $this->size = $size;
-
         return $this;
     }
 
@@ -160,6 +130,30 @@ class Location
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getShortDescription(): ?string
+    {
+        return $this->shortDescription;
+    }
+
+    public function setShortDescription(string $shortDescription): self
+    {
+        $this->shortDescription = $shortDescription;
 
         return $this;
     }
