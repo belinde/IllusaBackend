@@ -5,9 +5,9 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\LocationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\SceneRepository")
  */
-class Location
+class Scene
 {
     /**
      * @ORM\Id()
@@ -27,17 +27,17 @@ class Location
     private $attributes = [];
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Location")
+     * @ORM\ManyToOne(targetEntity="Scene")
      */
     private $parent;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Location")
+     * @ORM\OneToOne(targetEntity="Scene")
      */
     private $prev;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Location")
+     * @ORM\OneToOne(targetEntity="Scene")
      */
     private $next;
 
@@ -55,6 +55,11 @@ class Location
      * @ORM\Column(type="string", length=255)
      */
     private $shortDescription;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User")
+     */
+    private $owner;
 
 
     public function getId(): ?int
@@ -154,6 +159,18 @@ class Location
     public function setShortDescription(string $shortDescription): self
     {
         $this->shortDescription = $shortDescription;
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
 
         return $this;
     }

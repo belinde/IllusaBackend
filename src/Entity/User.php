@@ -152,4 +152,14 @@ class User implements UserInterface, JsonSerializable
 
         return $entity;
     }
+
+    /**
+     * @param $other
+     *
+     * @return bool
+     */
+    public function isTheSameOf($other): bool
+    {
+        return ($other instanceof self) and $other->getId() === $this->getId();
+    }
 }
