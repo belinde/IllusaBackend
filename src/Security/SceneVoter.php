@@ -15,13 +15,15 @@ class SceneVoter extends Voter
     const VIEW = 'view';
     const EDIT = 'edit';
     const DELETE = 'delete';
+    const CREATE = 'create';
 
     /**
      * @inheritDoc
      */
     protected function supports(string $attribute, $subject)
     {
-        return ($subject instanceof Scene) and in_array($attribute, [self::VIEW, self::EDIT, self::DELETE]);
+        return ($subject instanceof Scene) and in_array($attribute,
+                [self::VIEW, self::EDIT, self::DELETE, self::CREATE]);
     }
 
     /**
@@ -31,14 +33,18 @@ class SceneVoter extends Voter
      */
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token)
     {
-        if ($attribute === self::VIEW) {
-            return true;
-        }
         $parent = $subject->getParent();
-        if ($parent and $parent->getId()===1) {
-            return false;
-        }
+        switch ($attribute) {
+            case self::VIEW:
+                return true;
+            case self::CREATE:
+                return ($parent and $parent->getOwner()->isTheSameOf($token->getUser()));
+            default:
+                if ($parent and $parent->getId() === 1) {
+                    return false;
+                }
 
-        return $subject->getOwner() and $subject->getOwner()->isTheSameOf($token->getUser());
+                return $subject->getOwner() and $subject->getOwner()->isTheSameOf($token->getUser());
+        }
     }
 }

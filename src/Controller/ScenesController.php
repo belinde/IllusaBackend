@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Scene;
 use App\Repository\SceneRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -111,6 +112,31 @@ class ScenesController extends AbstractController
             ->setType($params->getAlnum('type'))
             ->setAttributes($params->get('attributes'));
 
+        $this->manager->flush();
+
+        return $this->getScene($scene->getId());
+
+    }
+
+    /**
+     * @Route("/scene", name="putScene", methods={"POST"})
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function postScene(Request $request, UserRepository $userRepository, SceneRepository $sceneRepository)
+    {
+        $params = $request->request;
+        $scene = new Scene();
+        $scene->setLabel($params->get('label'))
+            ->setShortDescription($params->get('shortDescription'))
+            ->setDescription($params->get('description'))
+            ->setType($params->getAlnum('type'))
+            ->setAttributes($params->get('attributes'))
+            ->setParent($sceneRepository->find($request->request->get('parent')['id'] ?? null))
+            ->setOwner($userRepository->findOneBy(['email' => $this->getUser()->getUsername()]));
+        $this->denyAccessUnlessGranted('create', $scene);
+        $this->manager->persist($scene);
         $this->manager->flush();
 
         return $this->getScene($scene->getId());
