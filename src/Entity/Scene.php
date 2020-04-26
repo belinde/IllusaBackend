@@ -32,12 +32,12 @@ class Scene
     private $parent;
 
     /**
-     * @ORM\OneToOne(targetEntity="Scene")
+     * @ORM\ManyToOne(targetEntity="Scene")
      */
     private $prev;
 
     /**
-     * @ORM\OneToOne(targetEntity="Scene")
+     * @ORM\ManyToOne(targetEntity="Scene")
      */
     private $next;
 

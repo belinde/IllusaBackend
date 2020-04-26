@@ -3,11 +3,11 @@
 namespace App\Security;
 
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\UserRepository;
+use Exception;
 use Firebase\JWT\JWT;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Throwable;
 
 /**
  * Class JwtManager
@@ -23,19 +23,19 @@ class JwtManager
      */
     private $passwordEncoder;
     /**
-     * @var EntityManagerInterface
+     * @var UserRepository
      */
-    private $entityManager;
+    private $userRepository;
 
     /**
      * JwtManager constructor.
      *
-     * @param EntityManagerInterface $entityManager
+     * @param UserRepository $userRepository
      * @param UserPasswordEncoderInterface $passwordEncoder
      */
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserRepository $userRepository, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->entityManager = $entityManager;
+        $this->userRepository = $userRepository;
         $this->passwordEncoder = $passwordEncoder;
     }
 
@@ -47,7 +47,7 @@ class JwtManager
      */
     public function accessToken(string $email, string $password): array
     {
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        $user = $this->userRepository->findOneBy(['email' => $email]);
 
         if ($user and $this->passwordEncoder->isPasswordValid($user, $password)) {
             $now = time();
@@ -71,16 +71,20 @@ class JwtManager
      * @param string $jwt
      *
      * @return User
-     * @throws \Exception
+     * @throws Exception
      */
     public function user(string $jwt): User
     {
         $decoded = JWT::decode($jwt, self::KEY, ['HS256']);
         if (!isset($decoded->user)) {
-            throw new \Exception("Invalid JWT token");
+            throw new Exception("Invalid JWT token");
         }
 
-        return User::fromJSON((array)$decoded->user);
+        $user = $this->userRepository->find($decoded->user->id);
+        if (!$user) {
+            throw new Exception("Unexistent user");
+        }
 
+        return $user;
     }
 }

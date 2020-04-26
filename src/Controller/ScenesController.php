@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Scene;
+use App\Entity\User;
 use App\Repository\SceneRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -19,16 +19,35 @@ class ScenesController extends AbstractController
      * @var EntityManagerInterface
      */
     private $manager;
+    /**
+     * @var SceneRepository
+     */
+    private $sceneRepository;
 
     /**
      * ScenesController constructor.
      *
      * @param EntityManagerInterface $manager
+     * @param SceneRepository $sceneRepository
      */
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityManagerInterface $manager, SceneRepository $sceneRepository)
     {
         $this->manager = $manager;
+        $this->sceneRepository = $sceneRepository;
     }
+
+    /**
+     * @return User
+     */
+    protected function getUser(): User
+    {
+        $user = parent::getUser();
+        if ($user instanceof User) {
+            return $user;
+        }
+        throw $this->createAccessDeniedException();
+    }
+
 
     private function sceneRef(?Scene $location): ?array
     {
@@ -98,10 +117,10 @@ class ScenesController extends AbstractController
      *
      * @return JsonResponse
      */
-    public function putScene(Request $request, SceneRepository $repository)
+    public function putScene(Request $request)
     {
         $params = $request->request;
-        $scene = $repository->find($params->getInt('id'));
+        $scene = $this->sceneRepository->find($params->getInt('id'));
         if (!$scene) {
             throw $this->createNotFoundException();
         }
@@ -115,16 +134,22 @@ class ScenesController extends AbstractController
         $this->manager->flush();
 
         return $this->getScene($scene->getId());
+    }
 
+    private function maybeFetchRelated(Request $request, string $field): ?Scene
+    {
+        $sceneId = $request->request->get($field)['id'] ?? null;
+
+        return $sceneId ? $this->sceneRepository->find($sceneId) : null;
     }
 
     /**
-     * @Route("/scene", name="putScene", methods={"POST"})
+     * @Route("/scene", name="postScene", methods={"POST"})
      * @param Request $request
      *
      * @return JsonResponse
      */
-    public function postScene(Request $request, UserRepository $userRepository, SceneRepository $sceneRepository)
+    public function postScene(Request $request)
     {
         $params = $request->request;
         $scene = new Scene();
@@ -133,13 +158,24 @@ class ScenesController extends AbstractController
             ->setDescription($params->get('description'))
             ->setType($params->getAlnum('type'))
             ->setAttributes($params->get('attributes'))
-            ->setParent($sceneRepository->find($request->request->get('parent')['id'] ?? null))
-            ->setOwner($userRepository->findOneBy(['email' => $this->getUser()->getUsername()]));
+            ->setParent($this->maybeFetchRelated($request, 'parent'))
+            ->setOwner($this->getUser());
+
+        $prev = $this->maybeFetchRelated($request, 'prev');
+        if ($prev) {
+            $next = $prev->getNext();
+            if ($next) {
+                $scene->setNext($next);
+                $next->setPrev($scene);
+            }
+            $prev->setNext($scene);
+            $scene->setPrev($prev);
+        }
+
         $this->denyAccessUnlessGranted('create', $scene);
         $this->manager->persist($scene);
         $this->manager->flush();
 
         return $this->getScene($scene->getId());
-
     }
 }

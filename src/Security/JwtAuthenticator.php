@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -16,7 +17,6 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
  */
 class JwtAuthenticator extends AbstractGuardAuthenticator
 {
-
     /**
      * @var JwtManager
      */
@@ -61,7 +61,10 @@ class JwtAuthenticator extends AbstractGuardAuthenticator
 
     /**
      * @param string $credentials
+     * @param UserProviderInterface $userProvider
      *
+     * @return UserInterface
+     * @throws Exception
      * @inheritDoc
      */
     public function getUser($credentials, UserProviderInterface $userProvider): UserInterface
