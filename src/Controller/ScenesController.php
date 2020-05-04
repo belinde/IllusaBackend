@@ -56,6 +56,7 @@ class ScenesController extends AbstractController
                 'id'               => $location->getId(),
                 'type'             => $location->getType(),
                 'label'            => $location->getLabel(),
+                'editable'         => $this->isGranted('edit', $location),
                 'shortDescription' => $location->getShortDescription(),
                 'attributes'       => $location->getAttributes()
             ]

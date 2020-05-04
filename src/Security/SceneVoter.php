@@ -40,7 +40,7 @@ class SceneVoter extends Voter
             case self::CREATE:
                 return ($parent and $parent->getOwner()->isTheSameOf($token->getUser()));
             default:
-                if ($parent and $parent->getId() === 1) {
+                if ($subject->getType() === 'illusa') {
                     return false;
                 }
 
